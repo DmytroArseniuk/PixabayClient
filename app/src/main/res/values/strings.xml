@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">PixabayClient</string>
+    <string name="search">Search</string>
+    <string name="clear_search">Clear search button</string>
+    <string name="loaded_image">Loaded image</string>
+    <string name="back_button">Back button</string>
+    <string name="details_dialog_title">Details</string>
+    <string name="details_dialog_description">Would you like to open photo details?</string>
+    <string name="details_dialog_negative_action">Dismiss</string>
+    <string name="details_dialog_positive_action">Open</string>
+    <string name="likes_description">Amount of likes</string>
+    <string name="comments_description">Amount of comments</string>
+    <string name="downloads_description">Amount of downloads</string>
+    <string name="some_error_alert">Some error occurred</string>
+</resources>
