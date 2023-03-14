@@ -1,5 +1,6 @@
 package com.arsars.pixabayclient.ui.screens.photo.search
 
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -22,8 +23,8 @@ import coil.compose.AsyncImage
 import coil.compose.AsyncImagePainter
 import com.arsars.pixabayclient.R
 import com.arsars.pixabayclient.data.source.local.photos.Photo
+import com.arsars.pixabayclient.extensions.toDp
 import com.arsars.pixabayclient.ui.TagsRow
-import com.arsars.pixabayclient.ui.toDp
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
@@ -37,6 +38,7 @@ fun PhotoDetailsScreen(
     val uiState = viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
+
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -58,7 +60,8 @@ fun PhotoDetailsScreen(
         Column(
             Modifier
                 .padding(it)
-                .verticalScroll(rememberScrollState())) {
+                .verticalScroll(rememberScrollState())
+        ) {
             val errorText = stringResource(R.string.some_error_alert)
             uiState.value.photo?.let {
                 PhotoWithDetails(it) {
@@ -105,7 +108,9 @@ private fun PhotoWithDetails(photo: Photo, showImageLadingError: () -> Unit) {
                     when (it) {
                         is AsyncImagePainter.State.Loading -> loading = true
                         is AsyncImagePainter.State.Success -> loading = false
-                        AsyncImagePainter.State.Empty -> {loading = false}
+                        AsyncImagePainter.State.Empty -> {
+                            loading = false
+                        }
                         is AsyncImagePainter.State.Error -> {
                             loading = false
                             showImageLadingError()

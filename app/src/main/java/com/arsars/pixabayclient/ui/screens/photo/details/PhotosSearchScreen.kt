@@ -40,6 +40,9 @@ import androidx.paging.compose.items
 import coil.compose.AsyncImage
 import com.arsars.pixabayclient.R
 import com.arsars.pixabayclient.data.source.local.photos.Photo
+import com.arsars.pixabayclient.extensions.noItems
+import com.arsars.pixabayclient.extensions.toDp
+import com.arsars.pixabayclient.extensions.toPx
 import com.arsars.pixabayclient.ui.*
 import com.arsars.pixabayclient.ui.screens.photo.details.PhotosSearchViewModel.UiAction.*
 import kotlinx.coroutines.launch
