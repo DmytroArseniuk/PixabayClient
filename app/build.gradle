@@ -6,6 +6,10 @@ plugins {
     id 'de.mannodermaus.android-junit5'
 }
 
+def apikeyPropertiesFile = rootProject.file("apikey.properties")
+def apikeyProperties = new Properties()
+apikeyProperties.load(new FileInputStream(apikeyPropertiesFile))
+
 android {
     namespace 'com.arsars.pixabayclient'
     compileSdk 33
@@ -21,6 +25,8 @@ android {
         vectorDrawables {
             useSupportLibrary true
         }
+
+        buildConfigField("String", "PIXABAY_KEY", apikeyProperties['PIXABAY_KEY'])
     }
 
     buildTypes {

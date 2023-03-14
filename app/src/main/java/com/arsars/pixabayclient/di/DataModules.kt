@@ -2,6 +2,7 @@ package com.arsars.pixabayclient.di
 
 import android.content.Context
 import androidx.room.Room
+import com.arsars.pixabayclient.BuildConfig
 import com.arsars.pixabayclient.data.PhotosMapper
 import com.arsars.pixabayclient.data.source.local.Converters
 import com.arsars.pixabayclient.data.source.local.PixabayDB
@@ -62,7 +63,7 @@ object NetworkModule {
 
     @Provides
     @RexabayApiKey
-    fun providesPixabayApiKey(): String = "CLIENT_ID_HERE"
+    fun providesPixabayApiKey(): String = BuildConfig.PIXABAY_KEY
 
     @Provides
     @PerPageSetting
