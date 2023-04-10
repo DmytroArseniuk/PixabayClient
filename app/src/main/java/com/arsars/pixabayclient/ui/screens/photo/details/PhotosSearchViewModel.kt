@@ -4,13 +4,18 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
-import com.arsars.pixabayclient.data.source.local.photos.Photo
+import androidx.paging.cachedIn
+import androidx.paging.map
 import com.arsars.pixabayclient.domain.usecases.GetPhotosPagingDataUseCase
+import com.arsars.pixabayclient.ui.screens.photo.PhotoUI
+import com.arsars.pixabayclient.ui.screens.photo.PhotoUIMapper
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class PhotosSearchViewModel
 @Inject
@@ -19,42 +24,42 @@ constructor(
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
-    val uiState: StateFlow<UiState>
-    val photos: Flow<PagingData<Photo>>
+    private val mapper = PhotoUIMapper()
+    private val _uiState = MutableStateFlow(UiState(""))
+    val photos: Flow<PagingData<PhotoUI>>
+    val uiState: StateFlow<UiState> = _uiState.asStateFlow()
     val accept: (UiAction) -> Unit
 
     init {
         val initialQuery: String = savedStateHandle[SAVED_QUERY] ?: DEFAULT_QUERY
-        val actionStateFlow = MutableSharedFlow<UiAction>()
-        val searchFlow = actionStateFlow.filterIsInstance<UiAction.Search>()
-            .onStart { emit(UiAction.Search) }
 
-        val queryFlow = actionStateFlow.filterIsInstance<UiAction.Input>()
+        val actionFlow = MutableSharedFlow<UiAction>()
+        val queryFlow = actionFlow.filterIsInstance<UiAction.Input>()
             .distinctUntilChanged()
-            .onStart { emit(UiAction.Input(initialQuery)) }
-
-        uiState = queryFlow
-            .map {
-                UiState(
-                    query = it.query
-                )
-            }
-            .stateIn(
-                scope = viewModelScope,
-                initialValue = UiState(),
-                started = SharingStarted.WhileSubscribed()
-            )
-
-
-        photos = searchFlow
-            .transform {
-                emit(uiState.value.query)
-            }
-            .flatMapLatest { getPhotosPagingDataUseCase(it) }
+            .stateIn(viewModelScope, SharingStarted.Lazily, UiAction.Input(initialQuery))
+        val searchFlow = actionFlow.filterIsInstance<UiAction.Search>()
+            .shareIn(viewModelScope, SharingStarted.Eagerly, 1)
 
         accept = { action ->
-            viewModelScope.launch { actionStateFlow.emit(action) }
+            viewModelScope.launch { actionFlow.emit(action) }
         }
+
+        viewModelScope.launch {
+            queryFlow.collect {
+                _uiState.emit(_uiState.value.copy(query = it.query))
+            }
+        }
+
+        photos = searchFlow.flatMapLatest {
+            getPhotosPagingDataUseCase(uiState.value.query).map { pagingData ->
+                pagingData.map(mapper::map)
+            }
+        }.cachedIn(viewModelScope)
+
+        viewModelScope.launch {
+            accept(UiAction.Search)
+        }
+
     }
 
     companion object {
@@ -63,7 +68,7 @@ constructor(
     }
 
     data class UiState(
-        val query: String = "",
+        val query: String = ""
     )
 
     sealed class UiAction {

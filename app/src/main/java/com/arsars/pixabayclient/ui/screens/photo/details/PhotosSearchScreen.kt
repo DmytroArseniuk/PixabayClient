@@ -39,11 +39,11 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
 import coil.compose.AsyncImage
 import com.arsars.pixabayclient.R
-import com.arsars.pixabayclient.data.source.local.photos.Photo
 import com.arsars.pixabayclient.extensions.noItems
 import com.arsars.pixabayclient.extensions.toDp
 import com.arsars.pixabayclient.extensions.toPx
 import com.arsars.pixabayclient.ui.*
+import com.arsars.pixabayclient.ui.screens.photo.PhotoUI
 import com.arsars.pixabayclient.ui.screens.photo.details.PhotosSearchViewModel.UiAction.*
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
@@ -53,14 +53,14 @@ import kotlin.math.roundToInt
 @Composable
 fun PhotosSearchScreen(
     modifier: Modifier = Modifier,
-    openDetails: (Photo) -> Unit,
+    openDetails: (PhotoUI) -> Unit,
     viewModel: PhotosSearchViewModel = hiltViewModel(),
 ) {
     val localFocusManager = LocalFocusManager.current
-    val state = viewModel.uiState.collectAsState()
-    val photos: LazyPagingItems<Photo> = viewModel.photos.collectAsLazyPagingItems()
+    val state by viewModel.uiState.collectAsState()
+    val photos: LazyPagingItems<PhotoUI> = viewModel.photos.collectAsLazyPagingItems()
 
-    var photoToOpen by remember { mutableStateOf<Photo?>(null) }
+    var photoToOpen by remember { mutableStateOf<PhotoUI?>(null) }
     photoToOpen?.let {
         val dismissDialog = { photoToOpen = null }
         OpenDetailsDialog(it, dismissDialog = dismissDialog) {
@@ -86,7 +86,7 @@ fun PhotosSearchScreen(
             TopAppBar(
                 title = {
                     SearchInput(
-                        state.value.query,
+                        state.query,
                         viewModel.accept,
                         {
                             coroutineScope.launch {
@@ -157,8 +157,8 @@ fun EmptyListState(
 private fun BoxScope.PhotosListContainer(
     localFocusManager: FocusManager,
     listState: LazyListState,
-    photos: LazyPagingItems<Photo>,
-    onItemClick: (Photo) -> Unit,
+    photos: LazyPagingItems<PhotoUI>,
+    onItemClick: (PhotoUI) -> Unit,
     notifyError: () -> Unit
 ) {
     PhotosList(localFocusManager, listState, photos) {
@@ -200,8 +200,8 @@ private fun BoxScope.PhotosListContainer(
 private fun PhotosList(
     localFocusManager: FocusManager,
     listState: LazyListState = rememberLazyListState(),
-    photos: LazyPagingItems<Photo>,
-    onItemClick: (Photo) -> Unit,
+    photos: LazyPagingItems<PhotoUI>,
+    onItemClick: (PhotoUI) -> Unit,
 ) {
     val nestedScrollConnection = remember {
         object : NestedScrollConnection {
@@ -285,7 +285,7 @@ private fun SearchInput(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PhotoItem(
-    photo: Photo,
+    photo: PhotoUI,
     height: Dp,
     horizontalPadding: Dp,
     onClick: () -> Unit
@@ -319,9 +319,9 @@ fun PhotoItem(
 
 @Composable
 fun OpenDetailsDialog(
-    photo: Photo,
+    photo: PhotoUI,
     dismissDialog: () -> Unit,
-    openDetails: (Photo) -> Unit
+    openDetails: (PhotoUI) -> Unit
 ) {
     AlertDialog(
         onDismissRequest = {
