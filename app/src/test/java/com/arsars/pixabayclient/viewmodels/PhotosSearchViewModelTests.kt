@@ -6,6 +6,7 @@ import com.arsars.pixabayclient.data.Stubs
 import com.arsars.pixabayclient.domain.usecases.GetPhotosPagingDataUseCase
 import com.arsars.pixabayclient.ui.screens.photo.details.PhotosSearchViewModel
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
@@ -39,8 +40,9 @@ class PhotosSearchViewModelTests {
             PhotosSearchViewModel(getPhotosPagingDataUseCase, savedStateHandle)
 
         val state = photosSearchViewModel.uiState.drop(1).first()
-        val photosPagingDataFlow = photosSearchViewModel.photos
+        photosSearchViewModel.photos.first()
+        testScheduler.advanceUntilIdle()
         assertEquals(PhotosSearchViewModel.UiState(query.query), state)
-        assertEquals(flowOfPages.first(), photosPagingDataFlow.first())
+        coVerify(exactly = 1) { getPhotosPagingDataUseCase(query.query) }
     }
 }
